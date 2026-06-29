@@ -1,0 +1,9 @@
+target/
+*.pdf
+*.log
+apache-maven-3.9.16/
+*.jar
+*.class
+.idea/
+*.iml
+.vscode/
