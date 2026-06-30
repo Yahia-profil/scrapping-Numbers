@@ -54,7 +54,7 @@ public class CeoContact {
     @Column(name = "cross_referenced")
     private boolean crossReferenced;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, columnDefinition = "varchar(20) default 'pending'")
     private String status = "pending";
 
     @Column(name = "is_valid")
