@@ -28,4 +28,9 @@ public interface CeoContactRepository extends JpaRepository<CeoContact, Long> {
 
     @Query("SELECT c FROM CeoContact c WHERE c.ceoName IS NULL OR c.ceoName = ''")
     List<CeoContact> findMissingCeoName();
+
+    List<CeoContact> findByCityOrderByViabilityScoreDesc(String city);
+
+    @Query("SELECT DISTINCT c.city FROM CeoContact c WHERE c.city IS NOT NULL ORDER BY c.city")
+    List<String> findDistinctCities();
 }

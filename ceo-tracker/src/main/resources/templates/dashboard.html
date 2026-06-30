@@ -13,47 +13,53 @@
         <div class="d-flex">
             <a href="/" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
             <a href="/stats" class="btn btn-outline-light btn-sm me-2">Statistiques</a>
-            <a href="/scrape" class="btn btn-warning btn-sm">Lancer Scraping</a>
         </div>
     </div>
 </nav>
 
 <div class="container">
-    <div class="row mb-3">
-        <div class="col">
-            <h4>Contacts trouvés : <span id="contactCount" class="badge bg-primary" th:text="${total}">0</span></h4>
+    <div class="row mb-3 align-items-center">
+        <div class="col-auto">
+            <h5 class="mb-0">Contacts : <span class="badge bg-primary" th:text="${total}">0</span></h5>
         </div>
         <div class="col-auto">
-            <a href="/export/csv" class="btn btn-success btn-sm">Export CSV</a>
+            <form method="get" action="/" class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <select name="ville" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="TOUTES" th:selected="${ville == 'TOUTES'}">Toutes les villes</option>
+                        <option th:each="v : ${villes}" th:value="${v}" th:text="${v}" th:selected="${ville == v}"></option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <a th:href="'/export/csv?ville=' + ${ville}" class="btn btn-success btn-sm">Export CSV</a>
+                </div>
+            </form>
         </div>
     </div>
+
     <div class="table-responsive">
         <table class="table table-striped table-hover align-middle">
             <thead class="table-dark">
                 <tr>
                     <th>Entreprise</th>
-                    <th>Téléphone</th>
-                    <th>Source</th>
+                    <th>Contact</th>
+                    <th>Fonction</th>
+                    <th>GSM</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="contact : ${contacts}">
                     <td th:text="${contact.companyName}">---</td>
+                    <td th:text="${contact.ceoName} ?: '-'">---</td>
+                    <td th:text="${contact.jobTitle} ?: '-'">---</td>
                     <td>
                         <span th:text="${contact.phoneNumber}">---</span>
                         <a th:href="'tel:' + ${contact.phoneNumber}" class="btn btn-sm btn-outline-primary ms-1">&#x1F4DE;</a>
                     </td>
-                    <td>
-                        <a th:if="${contact.sourceUrl != null}" th:href="${contact.sourceUrl}" target="_blank" class="text-decoration-none" title="Ouvrir la source">
-                            <small th:text="${contact.sourceType}">---</small>
-                            <small>&#x2197;</small>
-                        </a>
-                        <small th:unless="${contact.sourceUrl != null}" th:text="${contact.sourceType}">---</small>
-                    </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(contacts)}">
-                    <td colspan="3" class="text-center text-muted py-4">
-                        Aucun contact trouvé. <a href="/scrape">Lancer le scraping</a>
+                    <td colspan="4" class="text-center text-muted py-4">
+                        Aucun contact trouv\u00e9 pour cette ville.
                     </td>
                 </tr>
             </tbody>
@@ -62,50 +68,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-let contactCount = document.getElementById('contactCount');
-let tbody = document.querySelector('tbody');
-
-function escapeHtml(text) {
-    if (!text) return '-';
-    return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function addContactRow(contact) {
-    let noDataRow = tbody.querySelector('.no-data');
-    if (noDataRow) noDataRow.remove();
-
-    let tr = document.createElement('tr');
-    tr.innerHTML =
-        '<td>' + escapeHtml(contact.companyName) + '</td>' +
-        '<td><span>' + escapeHtml(contact.phoneNumber) + '</span> ' +
-            '<a href="tel:' + escapeHtml(contact.phoneNumber) + '" class="btn btn-sm btn-outline-primary ms-1">&#x1F4DE;</a></td>' +
-        '<td>' +
-            (contact.sourceUrl ? '<a href="' + escapeHtml(contact.sourceUrl) + '" target="_blank" class="text-decoration-none" title="Ouvrir la source"><small>' + escapeHtml(contact.sourceType || '') + '</small> <small>&#x2197;</small></a>' : '<small>' + escapeHtml(contact.sourceType || '') + '</small>') +
-        '</td>';
-
-    tbody.prepend(tr);
-}
-
-if (window.EventSource) {
-    let es = new EventSource('/stream');
-    es.addEventListener('contact', function(e) {
-        let contact = JSON.parse(e.data);
-        addContactRow(contact);
-        if (contactCount) contactCount.textContent = parseInt(contactCount.textContent || 0) + 1;
-    });
-    es.addEventListener('total', function(e) {
-        if (contactCount) contactCount.textContent = e.data;
-    });
-    es.addEventListener('progress', function(e) {
-        let p = JSON.parse(e.data);
-        console.log('Scraping: ' + p.scraper + ' - ' + p.count + ' contacts');
-    });
-    es.addEventListener('done', function() {
-        es.close();
-        console.log('Scraping terminé');
-    });
-}
-</script>
 </body>
 </html>

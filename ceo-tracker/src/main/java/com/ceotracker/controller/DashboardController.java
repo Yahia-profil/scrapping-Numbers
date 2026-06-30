@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
@@ -26,10 +27,13 @@ public class DashboardController {
     }
 
     @GetMapping("/")
-    public String dashboard(Model model) {
-        List<CeoContact> contacts = ceoContactService.getAll();
+    public String dashboard(Model model,
+                            @RequestParam(name = "ville", defaultValue = "CASABLANCA") String ville) {
+        List<CeoContact> contacts = ceoContactService.getByCity(ville);
         model.addAttribute("contacts", contacts);
         model.addAttribute("total", contacts.size());
+        model.addAttribute("ville", ville);
+        model.addAttribute("villes", ceoContactService.getAvailableCities());
         model.addAttribute("sourceTypes", ceoContactService.getSourceTypes());
         return "dashboard";
     }
@@ -46,21 +50,21 @@ public class DashboardController {
     }
 
     @GetMapping("/export/csv")
-    public ResponseEntity<byte[]> exportCsv() {
-        List<CeoContact> contacts = ceoContactService.getAll();
-        StringBuilder sb = new StringBuilder("Entreprise;Téléphone;Source;Lien\n");
+    public ResponseEntity<byte[]> exportCsv(@RequestParam(name = "ville", defaultValue = "CASABLANCA") String ville) {
+        List<CeoContact> contacts = ceoContactService.getByCity(ville);
+        StringBuilder sb = new StringBuilder("Entreprise;Contact;Fonction;GSM\n");
         for (CeoContact c : contacts) {
             sb.append(String.join(";",
                 escapeCsv(c.getCompanyName()),
-                c.getPhoneNumber(),
-                escapeCsv(c.getSourceType() != null ? c.getSourceType() : ""),
-                escapeCsv(c.getSourceUrl() != null ? c.getSourceUrl() : "")
+                escapeCsv(c.getCeoName() != null ? c.getCeoName() : ""),
+                escapeCsv(c.getJobTitle() != null ? c.getJobTitle() : ""),
+                escapeCsv(c.getPhoneNumber())
             )).append("\n");
         }
         byte[] bytes = sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
-        headers.setContentDispositionFormData("attachment", "contacts_entreprises.csv");
+        headers.setContentDispositionFormData("attachment", "contacts_" + ville + ".csv");
         return ResponseEntity.ok().headers(headers).body(bytes);
     }
 

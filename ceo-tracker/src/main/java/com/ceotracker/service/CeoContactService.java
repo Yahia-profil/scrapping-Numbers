@@ -3,6 +3,7 @@ package com.ceotracker.service;
 import com.ceotracker.entity.CeoContact;
 import com.ceotracker.repository.CeoContactRepository;
 import com.ceotracker.service.scraper.*;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,8 +39,43 @@ public class CeoContactService {
         this.scrapers.add(new PagesMarocScraper());
     }
 
+    @PostConstruct
+    public void loadPdfOnStartup() {
+        log.info("Chargement des donnees PDF au demarrage...");
+        PdfScraper pdfScraper = new PdfScraper();
+        try {
+            List<CeoContact> contacts = pdfScraper.scrape();
+            int saved = 0;
+            for (CeoContact c : contacts) {
+                if (saveIfNew(c)) saved++;
+            }
+            log.info("PDF: {} contacts charges ({} nouveaux)", contacts.size(), saved);
+        } catch (Exception e) {
+            log.warn("Erreur chargement PDF: {}", e.getMessage());
+        }
+    }
+
     public List<CeoContact> getAll() {
         return repository.findAll();
+    }
+
+    public List<CeoContact> getByCity(String city) {
+        if (city == null || city.isBlank() || city.equals("TOUTES")) {
+            return repository.findAll();
+        }
+        return repository.findByCityOrderByViabilityScoreDesc(city);
+    }
+
+    public List<String> getAvailableCities() {
+        List<String> cities = repository.findDistinctCities();
+        List<String> sorted = new ArrayList<>(cities);
+        // Casablanca en premier
+        sorted.sort((a, b) -> {
+            if (a.equals("CASABLANCA")) return -1;
+            if (b.equals("CASABLANCA")) return 1;
+            return a.compareTo(b);
+        });
+        return sorted;
     }
 
     public List<String> getSourceTypes() {

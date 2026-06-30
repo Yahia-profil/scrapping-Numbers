@@ -24,6 +24,15 @@ public class CeoContact {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "job_title")
+    private String jobTitle;
+
+    @Column(name = "city")
+    private String city;
+
     @Column(name = "source_url")
     private String sourceUrl;
 
@@ -79,6 +88,15 @@ public class CeoContact {
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getJobTitle() { return jobTitle; }
+    public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 
     public String getSourceUrl() { return sourceUrl; }
     public void setSourceUrl(String sourceUrl) { this.sourceUrl = sourceUrl; }

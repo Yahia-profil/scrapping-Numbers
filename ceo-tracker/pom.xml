@@ -78,7 +78,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>3.5.0</version>
                         <configuration>
-                            <mainClass>com.ceotracker.PdfDebug</mainClass>
+                            <mainClass>com.ceotracker.CeoTrackerApplication</mainClass>
                         </configuration>
                     </plugin>
                 </plugins>
