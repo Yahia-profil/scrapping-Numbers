@@ -48,13 +48,13 @@ public class CeoContact {
     @Column(name = "verified_on_maps")
     private boolean verifiedOnMaps;
 
-    @Column(name = "num_sources", columnDefinition = "int default 1")
+    @Column(name = "num_sources")
     private int numberOfSources = 1;
 
     @Column(name = "cross_referenced")
     private boolean crossReferenced;
 
-    @Column(name = "status", nullable = false, columnDefinition = "varchar(20) default 'pending'")
+    @Column(name = "status", nullable = false)
     private String status = "pending";
 
     @Column(name = "is_valid")

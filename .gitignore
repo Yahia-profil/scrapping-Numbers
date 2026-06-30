@@ -1,5 +1,6 @@
 target/
 *.pdf
+!ceo-tracker/src/main/resources/RH*.pdf
 *.log
 apache-maven-3.9.16/
 *.jar

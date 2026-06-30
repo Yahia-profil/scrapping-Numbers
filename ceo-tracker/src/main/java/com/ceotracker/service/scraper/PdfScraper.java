@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,6 +23,7 @@ public class PdfScraper extends BaseScraper {
 
     private static final Logger log = LoggerFactory.getLogger(PdfScraper.class);
     private static final String PDF_DIR = "C:\\Users\\user\\Desktop\\scrap";
+    private static final String CLASSPATH_PDF = "/RH Emails - The bigest data base-1.pdf";
 
     private static final Pattern GSM_ANY = Pattern.compile("0[67]\\s*(?:\\d\\s*){8}");
     private static final Pattern EMAIL_PAT = Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
@@ -78,23 +80,42 @@ public class PdfScraper extends BaseScraper {
     public List<CeoContact> scrape() {
         Set<CeoContact> results = new LinkedHashSet<>();
 
-        try (Stream<Path> paths = Files.list(Paths.get(PDF_DIR))) {
-            List<Path> pdfFiles = paths
-                .filter(p -> p.toString().toLowerCase().endsWith(".pdf"))
-                .sorted()
-                .toList();
-
-            for (Path pdfPath : pdfFiles) {
+        // Try classpath first (for Docker/deployment)
+        try (InputStream is = getClass().getResourceAsStream(CLASSPATH_PDF)) {
+            if (is != null) {
+                File temp = File.createTempFile("rh_emails", ".pdf");
                 try {
-                    List<CeoContact> contacts = extractFromPdf(pdfPath.toFile());
+                    Files.copy(is, temp.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    List<CeoContact> contacts = extractFromPdf(temp);
                     results.addAll(contacts);
-                    log.info("PDF [{}]: {} contacts", pdfPath.getFileName(), contacts.size());
-                } catch (Exception e) {
-                    log.debug("PDF erreur {}: {}", pdfPath.getFileName(), e.getMessage());
+                    log.info("PDF classpath: {} contacts", contacts.size());
+                } finally {
+                    temp.delete();
                 }
             }
         } catch (Exception e) {
-            log.warn("PDF: erreur listing: {}", e.getMessage());
+            log.debug("PDF classpath non trouve: {}", e.getMessage());
+        }
+
+        // Fallback: filesystem (local dev)
+        if (results.isEmpty()) {
+            try (Stream<Path> paths = Files.list(Paths.get(PDF_DIR))) {
+                List<Path> pdfFiles = paths
+                    .filter(p -> p.toString().toLowerCase().endsWith(".pdf"))
+                    .sorted()
+                    .toList();
+                for (Path pdfPath : pdfFiles) {
+                    try {
+                        List<CeoContact> contacts = extractFromPdf(pdfPath.toFile());
+                        results.addAll(contacts);
+                        log.info("PDF [{}]: {} contacts", pdfPath.getFileName(), contacts.size());
+                    } catch (Exception e) {
+                        log.debug("PDF erreur {}: {}", pdfPath.getFileName(), e.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("PDF: erreur listing: {}", e.getMessage());
+            }
         }
 
         List<CeoContact> result = new ArrayList<>(results);
