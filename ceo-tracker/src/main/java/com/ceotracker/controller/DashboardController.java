@@ -2,7 +2,6 @@ package com.ceotracker.controller;
 
 import com.ceotracker.entity.CeoContact;
 import com.ceotracker.service.CeoContactService;
-import com.ceotracker.service.ScrapingEventService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,21 +9,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Controller
 public class DashboardController {
 
     private final CeoContactService ceoContactService;
-    private final ScrapingEventService eventService;
 
-    public DashboardController(CeoContactService ceoContactService, ScrapingEventService eventService) {
+    public DashboardController(CeoContactService ceoContactService) {
         this.ceoContactService = ceoContactService;
-        this.eventService = eventService;
     }
 
     @GetMapping("/")
@@ -35,13 +30,7 @@ public class DashboardController {
         model.addAttribute("total", contacts.size());
         model.addAttribute("ville", ville);
         model.addAttribute("villes", ceoContactService.getAvailableCities());
-        model.addAttribute("sourceTypes", ceoContactService.getSourceTypes());
         return "dashboard";
-    }
-
-    @GetMapping("/stream")
-    public SseEmitter stream() {
-        return eventService.subscribe();
     }
 
     @GetMapping("/status")
@@ -49,12 +38,6 @@ public class DashboardController {
                                @RequestParam(defaultValue = "CASABLANCA") String ville) {
         ceoContactService.updateStatus(id, status);
         return "redirect:/?ville=" + ville;
-    }
-
-    @GetMapping("/scrape")
-    public String triggerScrape() {
-        CompletableFuture.runAsync(() -> ceoContactService.runScraping());
-        return "redirect:/";
     }
 
     @GetMapping("/export/csv")
