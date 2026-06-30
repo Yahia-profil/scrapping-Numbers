@@ -1,6 +1,6 @@
-# Casablanca CEO Tracker
+# Casablanca Annuaire Entreprises
 
-Application Spring Boot de scraping et tracking des CEOs d'entreprises à Casablanca.
+Application Spring Boot qui extrait et affiche les contacts d'entreprises (responsables, directeurs, managers) à partir d'un fichier PDF RH.
 
 ## Prérequis
 
@@ -36,27 +36,46 @@ spring.datasource.password=
 
 > ⚠️ Par défaut, le user est `root` et le mot de passe est vide (comme pour XAMPP).
 
-### 3. Lancer l'application
+### 3. Placer le fichier PDF
+
+Place le fichier PDF contenant les données RH dans le dossier parent :
+
+```
+scrap/
+├── RH Emails - The bigest data base-1.pdf
+└── ceo-tracker/
+```
+
+### 4. Lancer l'application
 
 ```bash
 mvn spring-boot:run
 ```
 
-L'application démarre sur **http://localhost:8080**.
+Au démarrage, l'application :
+1. Crée automatiquement les tables MySQL
+2. Extrait les données du PDF (entreprises, contacts, fonctions, GSM, villes)
+3. Les insère en base de données (doublons ignorés)
 
-### 4. Accéder au dashboard
+### 5. Accéder au dashboard
 
-Ouvre ton navigateur sur [http://localhost:8080/dashboard](http://localhost:8080/dashboard).
+Ouvre [http://localhost:8080](http://localhost:8080).
 
-## Profils Maven
+- Par défaut, seuls les contacts de **Casablanca** sont affichés
+- Utilise le menu déroulant pour filtrer par ville
+- Export CSV filtré disponible
 
-### Debug PDF
+## Données extraites
 
-Pour exécuter le debugger d'extraction PDF :
+Le PDF est parsé et les colonnes suivantes sont extraites :
 
-```bash
-mvn exec:java -P debug
-```
+| Colonne | Description |
+|---------|-------------|
+| **Entreprise** | Nom de la société |
+| **Contact** | Nom de la personne (M./Mme/Mlle) |
+| **Fonction** | Poste occupé (Directeur, Responsable, etc.) |
+| **GSM** | Numéro mobile 06/07 |
+| **Ville** | Localisation |
 
 ## Structure du projet
 
@@ -65,19 +84,20 @@ ceo-tracker/
 ├── src/main/java/com/ceotracker/
 │   ├── CeoTrackerApplication.java        # Point d'entrée Spring Boot
 │   ├── controller/DashboardController.java
-│   ├── entity/CeoContact.java            # Entité JPA
+│   ├── entity/CeoContact.java            # Entité JPA (company, ceoName, jobTitle, city, phone, email)
 │   ├── repository/CeoContactRepository.java
 │   ├── service/
-│   │   ├── CeoLookupService.java
-│   │   ├── CeoContactService.java
+│   │   ├── CeoContactService.java        # Chargement PDF au démarrage + filtrage ville
 │   │   ├── ScrapingEventService.java
 │   │   ├── ScoringService.java
 │   │   ├── PhoneNormalizer.java
-│   │   └── scraper/                      # Différents scrapers
-│   └── scheduler/ScrapingScheduler.java  # Planification automatique
+│   │   └── scraper/
+│   │       ├── PdfScraper.java           # Extraction du PDF RH Emails
+│   │       └── ...
+│   └── scheduler/ScrapingScheduler.java
 ├── src/main/resources/
 │   ├── application.properties
-│   └── templates/                        # Templates Thymeleaf
+│   └── templates/dashboard.html
 └── pom.xml
 ```
 
@@ -85,5 +105,4 @@ ceo-tracker/
 
 - **Spring Boot 4.1.0** (Web, Data JPA, Thymeleaf)
 - **MySQL** avec Hibernate (auto-update)
-- **Jsoup** pour le scraping HTML
 - **Apache PDFBox** pour l'extraction PDF
