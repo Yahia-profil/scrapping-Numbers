@@ -173,6 +173,18 @@ public class CeoContactService {
         }
     }
 
+    public void updateStatus(Long contactId, String status) {
+        if (!List.of("valide", "pending", "refus").contains(status)) {
+            log.warn("Statut invalide: {}", status);
+            return;
+        }
+        repository.findById(contactId).ifPresent(c -> {
+            c.setStatus(status);
+            repository.save(c);
+            log.debug("Statut mis a jour: {} -> {}", contactId, status);
+        });
+    }
+
     public long count() {
         return repository.count();
     }

@@ -44,6 +44,13 @@ public class DashboardController {
         return eventService.subscribe();
     }
 
+    @GetMapping("/status")
+    public String updateStatus(@RequestParam Long id, @RequestParam String status,
+                               @RequestParam(defaultValue = "CASABLANCA") String ville) {
+        ceoContactService.updateStatus(id, status);
+        return "redirect:/?ville=" + ville;
+    }
+
     @GetMapping("/scrape")
     public String triggerScrape() {
         CompletableFuture.runAsync(() -> ceoContactService.runScraping());

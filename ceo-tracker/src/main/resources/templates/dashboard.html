@@ -58,14 +58,23 @@
                         <a th:href="'tel:' + ${contact.phoneNumber}" class="btn btn-sm btn-outline-primary ms-1">&#x1F4DE;</a>
                     </td>
                     <td>
-                        <span th:if="${contact.status == 'valide'}" class="badge bg-success">Valide</span>
-                        <span th:if="${contact.status == 'pending'}" class="badge bg-warning text-dark">Pending</span>
-                        <span th:if="${contact.status == 'refus'}" class="badge bg-danger">Refus\u00e9</span>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <span th:if="${contact.status == 'valide'}" class="text-success">Valide</span>
+                                <span th:if="${contact.status == 'pending'}" class="text-warning">Pending</span>
+                                <span th:if="${contact.status == 'refus'}" class="text-danger">Refus&eacute;</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item text-success" th:href="@{/status(id=${contact.id}, status='valide', ville=${ville})}">Valide</a></li>
+                                <li><a class="dropdown-item text-warning" th:href="@{/status(id=${contact.id}, status='pending', ville=${ville})}">Pending</a></li>
+                                <li><a class="dropdown-item text-danger" th:href="@{/status(id=${contact.id}, status='refus', ville=${ville})}">Refus&eacute;</a></li>
+                            </ul>
+                        </div>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(contacts)}">
                     <td colspan="5" class="text-center text-muted py-4">
-                        Aucun contact trouv\u00e9 pour cette ville.
+                        Aucun contact trouv&eacute; pour cette ville.
                     </td>
                 </tr>
             </tbody>
