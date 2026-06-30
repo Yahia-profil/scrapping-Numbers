@@ -54,6 +54,9 @@ public class CeoContact {
     @Column(name = "cross_referenced")
     private boolean crossReferenced;
 
+    @Column(name = "status", nullable = false)
+    private String status = "pending";
+
     @Column(name = "is_valid")
     private boolean isValid;
 
@@ -118,6 +121,9 @@ public class CeoContact {
 
     public boolean isCrossReferenced() { return crossReferenced; }
     public void setCrossReferenced(boolean crossReferenced) { this.crossReferenced = crossReferenced; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     public boolean isValid() { return isValid; }
     public void setValid(boolean valid) { isValid = valid; }

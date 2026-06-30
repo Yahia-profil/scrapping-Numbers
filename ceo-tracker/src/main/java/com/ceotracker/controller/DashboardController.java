@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -52,16 +53,22 @@ public class DashboardController {
     @GetMapping("/export/csv")
     public ResponseEntity<byte[]> exportCsv(@RequestParam(name = "ville", defaultValue = "CASABLANCA") String ville) {
         List<CeoContact> contacts = ceoContactService.getByCity(ville);
-        StringBuilder sb = new StringBuilder("Entreprise;Contact;Fonction;GSM\n");
+        // UTF-8 BOM for Excel compatibility
+        byte[] bom = new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF};
+        StringBuilder sb = new StringBuilder("Entreprise;Contact;Fonction;GSM;Statut\n");
         for (CeoContact c : contacts) {
             sb.append(String.join(";",
                 escapeCsv(c.getCompanyName()),
                 escapeCsv(c.getCeoName() != null ? c.getCeoName() : ""),
                 escapeCsv(c.getJobTitle() != null ? c.getJobTitle() : ""),
-                escapeCsv(c.getPhoneNumber())
+                escapeCsv(c.getPhoneNumber()),
+                escapeCsv(c.getStatus())
             )).append("\n");
         }
-        byte[] bytes = sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] content = sb.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] bytes = new byte[bom.length + content.length];
+        System.arraycopy(bom, 0, bytes, 0, bom.length);
+        System.arraycopy(content, 0, bytes, bom.length, content.length);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
         headers.setContentDispositionFormData("attachment", "contacts_" + ville + ".csv");

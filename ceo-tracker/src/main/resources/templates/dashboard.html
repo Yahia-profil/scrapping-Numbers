@@ -45,6 +45,7 @@
                     <th>Contact</th>
                     <th>Fonction</th>
                     <th>GSM</th>
+                    <th>Statut</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,9 +57,14 @@
                         <span th:text="${contact.phoneNumber}">---</span>
                         <a th:href="'tel:' + ${contact.phoneNumber}" class="btn btn-sm btn-outline-primary ms-1">&#x1F4DE;</a>
                     </td>
+                    <td>
+                        <span th:if="${contact.status == 'valide'}" class="badge bg-success">Valide</span>
+                        <span th:if="${contact.status == 'pending'}" class="badge bg-warning text-dark">Pending</span>
+                        <span th:if="${contact.status == 'refus'}" class="badge bg-danger">Refus\u00e9</span>
+                    </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(contacts)}">
-                    <td colspan="4" class="text-center text-muted py-4">
+                    <td colspan="5" class="text-center text-muted py-4">
                         Aucun contact trouv\u00e9 pour cette ville.
                     </td>
                 </tr>
