@@ -44,10 +44,13 @@ public class CeoContactService {
         int updated = 0;
         for (CeoContact c : all) {
             String raw = c.getActivity();
-            if (raw != null && !raw.isBlank() && (c.getActivityCategory() == null || c.getActivityCategory().isBlank())) {
-                c.setActivityCategory(ActivityNormalizer.normalize(raw));
-                repository.save(c);
-                updated++;
+            if (raw != null && !raw.isBlank()) {
+                String normalized = ActivityNormalizer.normalize(raw);
+                if (normalized != null && !normalized.equals(c.getActivityCategory())) {
+                    c.setActivityCategory(normalized);
+                    repository.save(c);
+                    updated++;
+                }
             }
         }
         if (updated > 0) log.info("Catégories d'activité mises à jour: {}", updated);
