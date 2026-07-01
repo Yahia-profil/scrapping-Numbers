@@ -3,7 +3,6 @@ package com.ceotracker.repository;
 import com.ceotracker.entity.CeoContact;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,16 +18,10 @@ public interface CeoContactRepository extends JpaRepository<CeoContact, Long> {
     @Query("SELECT DISTINCT c.city FROM CeoContact c WHERE c.city IS NOT NULL ORDER BY c.city")
     List<String> findDistinctCities();
 
-    @Query("SELECT DISTINCT c.activity FROM CeoContact c WHERE c.activity IS NOT NULL AND c.activity <> '' ORDER BY c.activity")
-    List<String> findDistinctActivities();
+    @Query("SELECT DISTINCT c.activityCategory FROM CeoContact c WHERE c.activityCategory IS NOT NULL AND c.activityCategory <> '' ORDER BY c.activityCategory")
+    List<String> findDistinctActivityCategories();
 
-    List<CeoContact> findByActivityOrderByViabilityScoreDesc(String activity);
+    List<CeoContact> findByActivityCategoryOrderByViabilityScoreDesc(String activityCategory);
 
-    List<CeoContact> findByCityAndActivityOrderByViabilityScoreDesc(String city, String activity);
-
-    @Query("SELECT c FROM CeoContact c WHERE "
-         + "LOWER(c.companyName) LIKE LOWER(CONCAT('%', :q, '%')) "
-         + "OR LOWER(c.ceoName) LIKE LOWER(CONCAT('%', :q, '%')) "
-         + "OR LOWER(c.activity) LIKE LOWER(CONCAT('%', :q, '%'))")
-    List<CeoContact> search(@Param("q") String q);
+    List<CeoContact> findByCityAndActivityCategoryOrderByViabilityScoreDesc(String city, String activityCategory);
 }

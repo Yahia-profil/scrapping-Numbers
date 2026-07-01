@@ -44,16 +44,13 @@ public class CeoContactService {
         int updated = 0;
         for (CeoContact c : all) {
             String raw = c.getActivity();
-            if (raw != null && !raw.isBlank()) {
-                String normalized = ActivityNormalizer.normalize(raw);
-                if (normalized != null && !normalized.equals(raw)) {
-                    c.setActivity(normalized);
-                    repository.save(c);
-                    updated++;
-                }
+            if (raw != null && !raw.isBlank() && (c.getActivityCategory() == null || c.getActivityCategory().isBlank())) {
+                c.setActivityCategory(ActivityNormalizer.normalize(raw));
+                repository.save(c);
+                updated++;
             }
         }
-        if (updated > 0) log.info("Activités normalisées: {} contacts mis à jour", updated);
+        if (updated > 0) log.info("Catégories d'activité mises à jour: {}", updated);
     }
 
     public List<CeoContact> getAll() {
@@ -67,22 +64,18 @@ public class CeoContactService {
         return repository.findByCityOrderByViabilityScoreDesc(city);
     }
 
-    public List<CeoContact> getByActivity(String activity) {
-        return repository.findByActivityOrderByViabilityScoreDesc(activity);
-    }
-
-    public List<CeoContact> getByCityAndActivity(String city, String activity) {
+    public List<CeoContact> getByCityAndActivity(String city, String activityCategory) {
         if ((city == null || city.isBlank() || city.equals("TOUTES"))
-            && (activity == null || activity.isBlank() || activity.equals("TOUTES"))) {
+            && (activityCategory == null || activityCategory.isBlank() || activityCategory.equals("TOUTES"))) {
             return repository.findAll();
         }
         if (city == null || city.isBlank() || city.equals("TOUTES")) {
-            return repository.findByActivityOrderByViabilityScoreDesc(activity);
+            return repository.findByActivityCategoryOrderByViabilityScoreDesc(activityCategory);
         }
-        if (activity == null || activity.isBlank() || activity.equals("TOUTES")) {
+        if (activityCategory == null || activityCategory.isBlank() || activityCategory.equals("TOUTES")) {
             return repository.findByCityOrderByViabilityScoreDesc(city);
         }
-        return repository.findByCityAndActivityOrderByViabilityScoreDesc(city, activity);
+        return repository.findByCityAndActivityCategoryOrderByViabilityScoreDesc(city, activityCategory);
     }
 
     public List<String> getAvailableCities() {
@@ -97,7 +90,13 @@ public class CeoContactService {
     }
 
     public List<String> getAvailableActivities() {
-        return repository.findDistinctActivities();
+        List<String> list = new ArrayList<>(repository.findDistinctActivityCategories());
+        list.sort((a, b) -> {
+            if (a.equals("Autre")) return 1;
+            if (b.equals("Autre")) return -1;
+            return a.compareTo(b);
+        });
+        return list;
     }
 
     private synchronized boolean saveIfNew(CeoContact contact) {
@@ -112,9 +111,12 @@ public class CeoContactService {
                     ec.setCompanyName(contact.getCompanyName());
                     changed = true;
                 }
-                if (contact.getActivity() != null && !contact.getActivity().isBlank()
-                    && (ec.getActivity() == null || ec.getActivity().isBlank())) {
+                if (contact.getActivity() != null && !contact.getActivity().isBlank()) {
                     ec.setActivity(contact.getActivity());
+                    changed = true;
+                }
+                if (contact.getActivityCategory() != null && !contact.getActivityCategory().isBlank()) {
+                    ec.setActivityCategory(contact.getActivityCategory());
                     changed = true;
                 }
                 if (contact.getJobTitle() != null && !contact.getJobTitle().isBlank()
@@ -166,7 +168,8 @@ public class CeoContactService {
         return filtered.stream()
             .filter(c -> (c.getCompanyName() != null && c.getCompanyName().toLowerCase().contains(lower))
                       || (c.getCeoName() != null && c.getCeoName().toLowerCase().contains(lower))
-                      || (c.getActivity() != null && c.getActivity().toLowerCase().contains(lower)))
+                      || (c.getActivity() != null && c.getActivity().toLowerCase().contains(lower))
+                      || (c.getActivityCategory() != null && c.getActivityCategory().toLowerCase().contains(lower)))
             .toList();
     }
 

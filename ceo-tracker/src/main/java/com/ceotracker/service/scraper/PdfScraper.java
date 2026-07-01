@@ -161,14 +161,15 @@ public class PdfScraper {
                     // Some contacts are incomplete in the PDF, that's normal
                     String company = extractCompany(line, city);
                     String fonction = extractFonction(line, person);
-                    String activity = extractActivity(line, city, person);
+                    String rawActivity = extractActivity(line, city, person);
 
                     CeoContact contact = new CeoContact();
                     contact.setCompanyName(company != null && company.length() <= 100 ? company : "Inconnue");
                     contact.setCeoName(person);
                     contact.setPhoneNumber(gsm);
                     contact.setJobTitle(fonction);
-                    contact.setActivity(activity);
+                    contact.setActivity(rawActivity);
+                    contact.setActivityCategory(ActivityNormalizer.normalize(rawActivity));
                     contact.setCity(city);
                     contact.setSourceType(getSourceType());
                     contact.setLastVerifiedAt(LocalDateTime.now());
@@ -266,7 +267,7 @@ public class PdfScraper {
         String raw = line.substring(cityIdx + city.length(), personIdx).trim();
         if (raw.isEmpty() || raw.length() > 120) return null;
         if (raw.matches("^\\d.*") || raw.startsWith("http")) return null;
-        return ActivityNormalizer.normalize(raw);
+        return raw;
     }
 
     private String extractCity(String line) {

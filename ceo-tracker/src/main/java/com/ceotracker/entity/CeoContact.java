@@ -30,6 +30,9 @@ public class CeoContact {
     @Column(name = "activity")
     private String activity;
 
+    @Column(name = "activity_category")
+    private String activityCategory;
+
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
@@ -106,6 +109,9 @@ public class CeoContact {
 
     public String getActivity() { return activity; }
     public void setActivity(String activity) { this.activity = activity; }
+
+    public String getActivityCategory() { return activityCategory; }
+    public void setActivityCategory(String activityCategory) { this.activityCategory = activityCategory; }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
