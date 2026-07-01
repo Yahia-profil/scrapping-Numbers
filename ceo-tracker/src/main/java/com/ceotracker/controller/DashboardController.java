@@ -24,33 +24,38 @@ public class DashboardController {
 
     @GetMapping("/")
     public String dashboard(Model model,
-                            @RequestParam(name = "ville", defaultValue = "CASABLANCA") String ville) {
-        List<CeoContact> contacts = ceoContactService.getByCity(ville);
+                            @RequestParam(name = "ville", defaultValue = "CASABLANCA") String ville,
+                            @RequestParam(name = "activite", defaultValue = "TOUTES") String activite) {
+        List<CeoContact> contacts = ceoContactService.getByCityAndActivity(ville, activite);
         model.addAttribute("contacts", contacts);
         model.addAttribute("total", contacts.size());
         model.addAttribute("ville", ville);
+        model.addAttribute("activite", activite);
         model.addAttribute("villes", ceoContactService.getAvailableCities());
+        model.addAttribute("activites", ceoContactService.getAvailableActivities());
         return "dashboard";
     }
 
     @GetMapping("/status")
     public String updateStatus(@RequestParam Long id, @RequestParam String status,
-                               @RequestParam(defaultValue = "CASABLANCA") String ville) {
+                               @RequestParam(defaultValue = "CASABLANCA") String ville,
+                               @RequestParam(defaultValue = "TOUTES") String activite) {
         ceoContactService.updateStatus(id, status);
-        return "redirect:/?ville=" + ville;
+        return "redirect:/?ville=" + ville + "&activite=" + activite;
     }
 
     @GetMapping("/export/csv")
-    public ResponseEntity<byte[]> exportCsv(@RequestParam(name = "ville", defaultValue = "CASABLANCA") String ville) {
-        List<CeoContact> contacts = ceoContactService.getByCity(ville);
-        // UTF-8 BOM for Excel compatibility
+    public ResponseEntity<byte[]> exportCsv(@RequestParam(name = "ville", defaultValue = "CASABLANCA") String ville,
+                                            @RequestParam(name = "activite", defaultValue = "TOUTES") String activite) {
+        List<CeoContact> contacts = ceoContactService.getByCityAndActivity(ville, activite);
         byte[] bom = new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF};
-        StringBuilder sb = new StringBuilder("Entreprise;Contact;Fonction;GSM;Statut\n");
+        StringBuilder sb = new StringBuilder("Entreprise;Contact;Fonction;Activit\u00e9;GSM;Statut\n");
         for (CeoContact c : contacts) {
             sb.append(String.join(";",
                 escapeCsv(c.getCompanyName()),
                 escapeCsv(c.getCeoName() != null ? c.getCeoName() : ""),
                 escapeCsv(c.getJobTitle() != null ? c.getJobTitle() : ""),
+                escapeCsv(c.getActivity() != null ? c.getActivity() : ""),
                 escapeCsv(c.getPhoneNumber()),
                 escapeCsv(c.getStatus())
             )).append("\n");

@@ -17,4 +17,11 @@ public interface CeoContactRepository extends JpaRepository<CeoContact, Long> {
 
     @Query("SELECT DISTINCT c.city FROM CeoContact c WHERE c.city IS NOT NULL ORDER BY c.city")
     List<String> findDistinctCities();
+
+    @Query("SELECT DISTINCT c.activity FROM CeoContact c WHERE c.activity IS NOT NULL AND c.activity <> '' ORDER BY c.activity")
+    List<String> findDistinctActivities();
+
+    List<CeoContact> findByActivityOrderByViabilityScoreDesc(String activity);
+
+    List<CeoContact> findByCityAndActivityOrderByViabilityScoreDesc(String city, String activity);
 }

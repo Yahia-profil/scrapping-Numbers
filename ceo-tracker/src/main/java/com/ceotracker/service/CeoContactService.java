@@ -49,16 +49,37 @@ public class CeoContactService {
         return repository.findByCityOrderByViabilityScoreDesc(city);
     }
 
+    public List<CeoContact> getByActivity(String activity) {
+        return repository.findByActivityOrderByViabilityScoreDesc(activity);
+    }
+
+    public List<CeoContact> getByCityAndActivity(String city, String activity) {
+        if ((city == null || city.isBlank() || city.equals("TOUTES"))
+            && (activity == null || activity.isBlank() || activity.equals("TOUTES"))) {
+            return repository.findAll();
+        }
+        if (city == null || city.isBlank() || city.equals("TOUTES")) {
+            return repository.findByActivityOrderByViabilityScoreDesc(activity);
+        }
+        if (activity == null || activity.isBlank() || activity.equals("TOUTES")) {
+            return repository.findByCityOrderByViabilityScoreDesc(city);
+        }
+        return repository.findByCityAndActivityOrderByViabilityScoreDesc(city, activity);
+    }
+
     public List<String> getAvailableCities() {
         List<String> cities = repository.findDistinctCities();
         List<String> sorted = new ArrayList<>(cities);
-        // Casablanca en premier
         sorted.sort((a, b) -> {
             if (a.equals("CASABLANCA")) return -1;
             if (b.equals("CASABLANCA")) return 1;
             return a.compareTo(b);
         });
         return sorted;
+    }
+
+    public List<String> getAvailableActivities() {
+        return repository.findDistinctActivities();
     }
 
     private synchronized boolean saveIfNew(CeoContact contact) {
@@ -71,6 +92,16 @@ public class CeoContactService {
                     && !contact.getCompanyName().isBlank()
                     && (ec.getCompanyName() == null || ec.getCompanyName().equals("Inconnue"))) {
                     ec.setCompanyName(contact.getCompanyName());
+                    changed = true;
+                }
+                if (contact.getActivity() != null && !contact.getActivity().isBlank()
+                    && (ec.getActivity() == null || ec.getActivity().isBlank())) {
+                    ec.setActivity(contact.getActivity());
+                    changed = true;
+                }
+                if (contact.getJobTitle() != null && !contact.getJobTitle().isBlank()
+                    && (ec.getJobTitle() == null || ec.getJobTitle().isBlank())) {
+                    ec.setJobTitle(contact.getJobTitle());
                     changed = true;
                 }
                 if (changed) {

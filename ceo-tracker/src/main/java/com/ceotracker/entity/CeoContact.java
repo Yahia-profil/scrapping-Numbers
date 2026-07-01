@@ -27,6 +27,9 @@ public class CeoContact {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "activity")
+    private String activity;
+
     @Column(name = "job_title")
     private String jobTitle;
 
@@ -97,6 +100,9 @@ public class CeoContact {
 
     public String getJobTitle() { return jobTitle; }
     public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
+
+    public String getActivity() { return activity; }
+    public void setActivity(String activity) { this.activity = activity; }
 
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }

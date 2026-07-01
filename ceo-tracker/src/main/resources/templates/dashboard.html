@@ -7,8 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #163D70;
-            --secondary: #163D70;
+            --primary: #1E4E8C;
+            --secondary: #2F80ED;
             --success: #27AE60;
             --warning: #F2994A;
             --error: #EB5757;
@@ -305,8 +305,12 @@
                     <option value="TOUTES" th:selected="${ville == 'TOUTES'}">Toutes les villes</option>
                     <option th:each="v : ${villes}" th:value="${v}" th:text="${v}" th:selected="${ville == v}"></option>
                 </select>
+                <select name="activite" class="select-filter" onchange="this.form.submit()">
+                    <option value="TOUTES" th:selected="${activite == 'TOUTES'}">Toutes les activit&eacute;s</option>
+                    <option th:each="a : ${activites}" th:value="${a}" th:text="${a}" th:selected="${activite == a}"></option>
+                </select>
             </form>
-            <a th:href="'/export/csv?ville=' + ${ville}" class="btn btn-success">
+            <a th:href="'/export/csv?ville=' + ${ville} + '&amp;activite=' + ${activite}" class="btn btn-success">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2M5 8l3 3 3-3M8 3v8" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Export CSV
             </a>
@@ -319,6 +323,7 @@
                 <thead>
                     <tr>
                         <th>Entreprise</th>
+                        <th>Activit&eacute;</th>
                         <th>Contact</th>
                         <th>Fonction</th>
                         <th>GSM</th>
@@ -328,6 +333,7 @@
                 <tbody>
                     <tr th:each="contact : ${contacts}">
                         <td class="cell-company" th:text="${contact.companyName}">---</td>
+                        <td><span class="cell-title" th:text="${contact.activity} ?: '-'">---</span></td>
                         <td><span class="cell-name" th:text="${contact.ceoName} ?: '-'">---</span></td>
                         <td><span class="cell-title" th:text="${contact.jobTitle} ?: '-'">---</span></td>
                         <td>
@@ -347,15 +353,15 @@
                                     <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1.5l4 4 4-4" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 </button>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item is-success" th:href="@{/status(id=${contact.id}, status='valide', ville=${ville})}">Valide</a>
-                                    <a class="dropdown-item is-warning" th:href="@{/status(id=${contact.id}, status='pending', ville=${ville})}">Pending</a>
-                                    <a class="dropdown-item is-error" th:href="@{/status(id=${contact.id}, status='refus', ville=${ville})}">Refus&eacute;</a>
+                                    <a class="dropdown-item is-success" th:href="@{/status(id=${contact.id}, status='valide', ville=${ville}, activite=${activite})}">Valide</a>
+                                    <a class="dropdown-item is-warning" th:href="@{/status(id=${contact.id}, status='pending', ville=${ville}, activite=${activite})}">Pending</a>
+                                    <a class="dropdown-item is-error" th:href="@{/status(id=${contact.id}, status='refus', ville=${ville}, activite=${activite})}">Refus&eacute;</a>
                                 </div>
                             </div>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(contacts)}">
-                        <td colspan="5">
+                        <td colspan="6">
                             <div class="empty-state">
                                 <p>Aucun contact trouv&eacute; pour cette ville.</p>
                             </div>
