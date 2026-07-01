@@ -36,6 +36,24 @@ public class CeoContactService {
         } catch (Exception e) {
             log.warn("Erreur chargement PDF: {}", e.getMessage());
         }
+        migrateActivities();
+    }
+
+    private void migrateActivities() {
+        List<CeoContact> all = repository.findAll();
+        int updated = 0;
+        for (CeoContact c : all) {
+            String raw = c.getActivity();
+            if (raw != null && !raw.isBlank()) {
+                String normalized = ActivityNormalizer.normalize(raw);
+                if (normalized != null && !normalized.equals(raw)) {
+                    c.setActivity(normalized);
+                    repository.save(c);
+                    updated++;
+                }
+            }
+        }
+        if (updated > 0) log.info("Activités normalisées: {} contacts mis à jour", updated);
     }
 
     public List<CeoContact> getAll() {

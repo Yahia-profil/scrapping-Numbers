@@ -1,6 +1,7 @@
 package com.ceotracker.service.scraper;
 
 import com.ceotracker.entity.CeoContact;
+import com.ceotracker.service.ActivityNormalizer;
 import com.ceotracker.service.PhoneNormalizer;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -264,9 +265,8 @@ public class PdfScraper {
         if (cityIdx < 0 || personIdx < 0 || personIdx <= cityIdx) return null;
         String raw = line.substring(cityIdx + city.length(), personIdx).trim();
         if (raw.isEmpty() || raw.length() > 120) return null;
-        // Skip if it looks like part of address or a phone
         if (raw.matches("^\\d.*") || raw.startsWith("http")) return null;
-        return raw;
+        return ActivityNormalizer.normalize(raw);
     }
 
     private String extractCity(String line) {
