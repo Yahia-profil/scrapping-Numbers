@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -25,31 +27,64 @@ public class DashboardController {
     @GetMapping("/")
     public String dashboard(Model model,
                             @RequestParam(name = "ville", defaultValue = "CASABLANCA") String ville,
-                            @RequestParam(name = "activite", defaultValue = "TOUTES") String activite) {
-        List<CeoContact> contacts = ceoContactService.getByCityAndActivity(ville, activite);
+                            @RequestParam(name = "activite", defaultValue = "TOUTES") String activite,
+                            @RequestParam(name = "statut", defaultValue = "TOUS") String statut,
+                            @RequestParam(name = "q", defaultValue = "") String q) {
+        List<CeoContact> contacts = ceoContactService.search(ville, activite, q, statut);
         model.addAttribute("contacts", contacts);
         model.addAttribute("total", contacts.size());
         model.addAttribute("ville", ville);
         model.addAttribute("activite", activite);
+        model.addAttribute("statut", statut);
+        model.addAttribute("q", q);
         model.addAttribute("villes", ceoContactService.getAvailableCities());
         model.addAttribute("activites", ceoContactService.getAvailableActivities());
         return "dashboard";
     }
 
+    @GetMapping("/search")
+    public String searchRows(Model model,
+                             @RequestParam(name = "ville", defaultValue = "CASABLANCA") String ville,
+                             @RequestParam(name = "activite", defaultValue = "TOUTES") String activite,
+                             @RequestParam(name = "statut", defaultValue = "TOUS") String statut,
+                             @RequestParam(name = "q", defaultValue = "") String q) {
+        List<CeoContact> contacts = ceoContactService.search(ville, activite, q, statut);
+        model.addAttribute("contacts", contacts);
+        model.addAttribute("nombre", contacts.size());
+        model.addAttribute("ville", ville);
+        model.addAttribute("activite", activite);
+        model.addAttribute("statut", statut);
+        model.addAttribute("q", q);
+        return "fragments :: tableRows";
+    }
+
+    @PostMapping("/notes")
+    @ResponseBody
+    public String saveNotes(@RequestParam Long id, @RequestParam String notes) {
+        ceoContactService.updateNotes(id, notes);
+        return "ok";
+    }
+
     @GetMapping("/status")
     public String updateStatus(@RequestParam Long id, @RequestParam String status,
                                @RequestParam(defaultValue = "CASABLANCA") String ville,
-                               @RequestParam(defaultValue = "TOUTES") String activite) {
+                               @RequestParam(defaultValue = "TOUTES") String activite,
+                               @RequestParam(defaultValue = "TOUS") String statut,
+                               @RequestParam(defaultValue = "") String q) {
         ceoContactService.updateStatus(id, status);
-        return "redirect:/?ville=" + ville + "&activite=" + activite;
+        String params = "?ville=" + ville + "&activite=" + activite + "&statut=" + statut;
+        if (!q.isEmpty()) params += "&q=" + q;
+        return "redirect:/" + params;
     }
 
     @GetMapping("/export/csv")
     public ResponseEntity<byte[]> exportCsv(@RequestParam(name = "ville", defaultValue = "CASABLANCA") String ville,
-                                            @RequestParam(name = "activite", defaultValue = "TOUTES") String activite) {
-        List<CeoContact> contacts = ceoContactService.getByCityAndActivity(ville, activite);
+                                            @RequestParam(name = "activite", defaultValue = "TOUTES") String activite,
+                                            @RequestParam(name = "statut", defaultValue = "TOUS") String statut,
+                                            @RequestParam(name = "q", defaultValue = "") String q) {
+        List<CeoContact> contacts = ceoContactService.search(ville, activite, q, statut);
         byte[] bom = new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF};
-        StringBuilder sb = new StringBuilder("Entreprise;Contact;Fonction;Activit\u00e9;GSM;Statut\n");
+        StringBuilder sb = new StringBuilder("Entreprise;Contact;Fonction;Activit\u00e9;GSM;Statut;Notes\n");
         for (CeoContact c : contacts) {
             sb.append(String.join(";",
                 escapeCsv(c.getCompanyName()),
@@ -57,7 +92,8 @@ public class DashboardController {
                 escapeCsv(c.getJobTitle() != null ? c.getJobTitle() : ""),
                 escapeCsv(c.getActivity() != null ? c.getActivity() : ""),
                 escapeCsv(c.getPhoneNumber()),
-                escapeCsv(c.getStatus())
+                escapeCsv(c.getStatus()),
+                escapeCsv(c.getNotes())
             )).append("\n");
         }
         byte[] content = sb.toString().getBytes(StandardCharsets.UTF_8);

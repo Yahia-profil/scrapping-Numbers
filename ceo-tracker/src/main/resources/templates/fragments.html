@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<body>
+<div th:fragment="tableRows">
+    <tr th:each="contact : ${contacts}">
+        <td class="cell-company" th:text="${contact.companyName}">---</td>
+        <td><span class="cell-title" th:text="${contact.activity} ?: '-'">---</span></td>
+        <td><span class="cell-name" th:text="${contact.ceoName} ?: '-'">---</span></td>
+        <td><span class="cell-title" th:text="${contact.jobTitle} ?: '-'">---</span></td>
+        <td>
+            <div class="cell-phone">
+                <span class="phone-num" th:text="${contact.phoneNumber}">---</span>
+                <a th:href="'tel:' + ${contact.phoneNumber}" class="btn-call" title="Appeler">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12.5 9.77v2a1.33 1.33 0 01-1.46 1.33 13.17 13.17 0 01-5.73-2.04 13 13 0 01-4-4A13.17 13.17 0 01.9 2.96 1.33 1.33 0 012.22 1.5h2a1.33 1.33 0 011.34 1.15 8.55 8.55 0 00.47 1.88 1.33 1.33 0 01-.3 1.4l-.85.85a10.67 10.67 0 004 4l.85-.85a1.33 1.33 0 011.4-.3 8.55 8.55 0 001.88.47A1.33 1.33 0 0112.5 9.77z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+        </td>
+        <td>
+            <div class="dropdown">
+                <button class="dropdown-toggle" type="button" onclick="toggleDropdown(this)">
+                    <span th:if="${contact.status == 'valide'}" class="badge badge-success">Valide</span>
+                    <span th:if="${contact.status == 'pending'}" class="badge badge-warning">Pending</span>
+                    <span th:if="${contact.status == 'refus'}" class="badge badge-error">Refus&eacute;</span>
+                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1.5l4 4 4-4" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item is-success" th:href="@{/status(id=${contact.id}, status='valide', ville=${ville}, activite=${activite}, statut=${statut}, q=${q})}">Valide</a>
+                    <a class="dropdown-item is-warning" th:href="@{/status(id=${contact.id}, status='pending', ville=${ville}, activite=${activite}, statut=${statut}, q=${q})}">Pending</a>
+                    <a class="dropdown-item is-error" th:href="@{/status(id=${contact.id}, status='refus', ville=${ville}, activite=${activite}, statut=${statut}, q=${q})}">Refus&eacute;</a>
+                </div>
+            </div>
+        </td>
+        <td>
+            <span class="cell-notes" th:attr="data-id=${contact.id},data-val=${contact.notes ?: ''}" th:text="${contact.notes} ?: 'Ajouter...'"></span>
+        </td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(contacts)}">
+        <td colspan="7">
+            <div class="empty-state">
+                <p>Aucun contact trouv&eacute;.</p>
+            </div>
+        </td>
+    </tr>
+</div>
+</body>
+</html>

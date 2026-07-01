@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Casablanca Annuaire Entreprises</title>
+    <script>if (localStorage.getItem('dark')==='1') document.documentElement.classList.add('dark');</script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -20,6 +21,28 @@
             --radius: 10px;
             --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
             --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+            --navbar-bg: #0A2540;
+            --hover-row: #F8FAFD;
+            --thead-bg: #F0F4F9;
+            --border-light: #EDF2F7;
+        }
+        .dark {
+            --primary: #4A9EFF;
+            --secondary: #60B0FF;
+            --success: #34D399;
+            --warning: #FBBF24;
+            --error: #F87171;
+            --bg: #0F172A;
+            --card: #1E293B;
+            --text: #E2E8F0;
+            --text-secondary: #94A3B8;
+            --border: #334155;
+            --shadow: 0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+            --shadow-md: 0 4px 6px rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.3);
+            --navbar-bg: #020617;
+            --hover-row: #1E293B;
+            --thead-bg: #334155;
+            --border-light: #334155;
         }
         * { box-sizing: border-box; }
         body {
@@ -33,7 +56,7 @@
             min-height: 100vh;
         }
         .navbar {
-            background: #0A2540 !important;
+            background: var(--navbar-bg) !important;
             box-shadow: var(--shadow-md);
             padding: 8px 0;
         }
@@ -122,7 +145,65 @@
             min-width: 200px;
         }
         .select-filter:focus { border-color: var(--secondary); }
+        .search-input {
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 400;
+            padding: 8px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--text);
+            outline: none;
+            transition: border-color .2s;
+            min-width: 220px;
+        }
+        .search-input:focus { border-color: var(--secondary); }
+        .cell-notes {
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            min-width: 280px;
+            max-width: 400px;
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .cell-notes:hover { color: var(--text); }
+        .cell-notes.editing {
+            white-space: normal;
+            overflow: visible;
+            max-width: none;
+        }
+        .notes-textarea {
+            font-family: inherit;
+            font-size: 13px;
+            padding: 8px 10px;
+            border: 1.5px solid var(--secondary);
+            border-radius: 6px;
+            resize: vertical;
+            outline: none;
+            width: 100%;
+            min-height: 80px;
+            box-sizing: border-box;
+            line-height: 1.5;
+        }
         .btn {
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 8px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all .2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.5;
+        }
             font-family: inherit;
             font-weight: 500;
             font-size: 14px;
@@ -157,7 +238,7 @@
             font-size: 14px;
         }
         thead th {
-            background: #F0F4F9;
+            background: var(--thead-bg);
             color: var(--text-secondary);
             font-weight: 600;
             font-size: 12px;
@@ -170,10 +251,10 @@
         }
         tbody td {
             padding: 16px;
-            border-bottom: 1px solid #EDF2F7;
+            border-bottom: 1px solid var(--border-light);
             vertical-align: middle;
         }
-        tbody tr:hover { background: #F8FAFD; }
+        tbody tr:hover { background: var(--hover-row); }
         tbody tr:last-child td { border-bottom: none; }
         .cell-company { font-weight: 600; color: var(--text); }
         .cell-name { color: var(--text); }
@@ -203,7 +284,7 @@
             transition: all .2s;
             flex-shrink: 0;
         }
-        .btn-call:hover { border-color: var(--secondary); background: #EBF5FF; }
+        .btn-call:hover { border-color: var(--secondary); background: var(--hover-row); }
 
         .badge {
             display: inline-block;
@@ -261,7 +342,7 @@
             font-weight: 500;
             transition: background .15s;
         }
-        .dropdown-item:hover { background: #F8FAFD; }
+        .dropdown-item:hover { background: var(--hover-row); }
         .dropdown-item.is-success { color: var(--success); }
         .dropdown-item.is-warning { color: var(--warning); }
         .dropdown-item.is-error { color: var(--error); }
@@ -288,34 +369,44 @@
 <nav class="navbar">
     <div class="container">
         <a class="navbar-brand" href="/">Casablanca Annuaire Entreprises</a>
-        <a class="nav-link" href="/">Dashboard</a>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <a class="nav-link" href="/">Dashboard</a>
+            <button class="nav-link" id="darkToggle" onclick="toggleDark()" style="border-color:rgba(255,255,255,.35);cursor:pointer;font-size:16px;line-height:1;padding:4px 12px;" title="Mode sombre">&#9790;</button>
+        </div>
     </div>
 </nav>
 
 <div class="container" style="padding-bottom: 48px;">
 
-    <div class="page-header">
-        <h1 class="page-title">
-            Contacts
-            <span class="count-badge" th:text="${total}">0</span>
-        </h1>
-        <div class="header-actions">
-            <form method="get" action="/" style="display:contents;">
-                <select name="ville" class="select-filter" onchange="this.form.submit()">
-                    <option value="TOUTES" th:selected="${ville == 'TOUTES'}">Toutes les villes</option>
-                    <option th:each="v : ${villes}" th:value="${v}" th:text="${v}" th:selected="${ville == v}"></option>
-                </select>
-                <select name="activite" class="select-filter" onchange="this.form.submit()">
-                    <option value="TOUTES" th:selected="${activite == 'TOUTES'}">Toutes les activit&eacute;s</option>
-                    <option th:each="a : ${activites}" th:value="${a}" th:text="${a}" th:selected="${activite == a}"></option>
-                </select>
-            </form>
-            <a th:href="'/export/csv?ville=' + ${ville} + '&amp;activite=' + ${activite}" class="btn btn-success">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2M5 8l3 3 3-3M8 3v8" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                Export CSV
-            </a>
+        <div class="page-header">
+            <h1 class="page-title">
+                Contacts
+                <span class="count-badge" th:text="${total}">0</span>
+            </h1>
+            <div class="header-actions">
+                <form method="get" action="/" style="display:contents;" id="filterForm">
+                    <input type="text" name="q" class="search-input" placeholder="Rechercher..." th:value="${q}" autocomplete="off">
+                    <select name="ville" class="select-filter" onchange="this.form.submit()">
+                        <option value="TOUTES" th:selected="${ville == 'TOUTES'}">Toutes les villes</option>
+                        <option th:each="v : ${villes}" th:value="${v}" th:text="${v}" th:selected="${ville == v}"></option>
+                    </select>
+                    <select name="activite" class="select-filter" onchange="this.form.submit()">
+                        <option value="TOUTES" th:selected="${activite == 'TOUTES'}">Toutes les activit&eacute;s</option>
+                        <option th:each="a : ${activites}" th:value="${a}" th:text="${a}" th:selected="${activite == a}"></option>
+                    </select>
+                    <select name="statut" class="select-filter" onchange="this.form.submit()">
+                        <option value="TOUS" th:selected="${statut == 'TOUS'}">Tous les statuts</option>
+                        <option value="valide" th:selected="${statut == 'valide'}">Valide</option>
+                        <option value="pending" th:selected="${statut == 'pending'}">Pending</option>
+                        <option value="refus" th:selected="${statut == 'refus'}">Refus</option>
+                    </select>
+                </form>
+                <a th:href="'/export/csv?ville=' + ${ville} + '&amp;activite=' + ${activite} + '&amp;statut=' + ${statut} + '&amp;q=' + ${q}" class="btn btn-success">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2M5 8l3 3 3-3M8 3v8" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Export CSV
+                </a>
+            </div>
         </div>
-    </div>
 
     <div class="card">
         <div class="table-scroll">
@@ -328,9 +419,10 @@
                         <th>Fonction</th>
                         <th>GSM</th>
                         <th>Statut</th>
+                        <th>Notes</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tableBody">
                     <tr th:each="contact : ${contacts}">
                         <td class="cell-company" th:text="${contact.companyName}">---</td>
                         <td><span class="cell-title" th:text="${contact.activity} ?: '-'">---</span></td>
@@ -353,17 +445,20 @@
                                     <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1.5l4 4 4-4" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 </button>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item is-success" th:href="@{/status(id=${contact.id}, status='valide', ville=${ville}, activite=${activite})}">Valide</a>
-                                    <a class="dropdown-item is-warning" th:href="@{/status(id=${contact.id}, status='pending', ville=${ville}, activite=${activite})}">Pending</a>
-                                    <a class="dropdown-item is-error" th:href="@{/status(id=${contact.id}, status='refus', ville=${ville}, activite=${activite})}">Refus&eacute;</a>
+                                    <a class="dropdown-item is-success" th:href="@{/status(id=${contact.id}, status='valide', ville=${ville}, activite=${activite}, statut=${statut}, q=${q})}">Valide</a>
+                                    <a class="dropdown-item is-warning" th:href="@{/status(id=${contact.id}, status='pending', ville=${ville}, activite=${activite}, statut=${statut}, q=${q})}">Pending</a>
+                                    <a class="dropdown-item is-error" th:href="@{/status(id=${contact.id}, status='refus', ville=${ville}, activite=${activite}, statut=${statut}, q=${q})}">Refus&eacute;</a>
                                 </div>
                             </div>
                         </td>
+                        <td>
+                            <span class="cell-notes" th:attr="data-id=${contact.id},data-val=${contact.notes ?: ''}" th:text="${contact.notes} ?: 'Ajouter...'"></span>
+                        </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(contacts)}">
-                        <td colspan="6">
+                        <td colspan="7">
                             <div class="empty-state">
-                                <p>Aucun contact trouv&eacute; pour cette ville.</p>
+                                <p>Aucun contact trouv&eacute;.</p>
                             </div>
                         </td>
                     </tr>
@@ -375,17 +470,103 @@
 </div>
 
 <script>
+    var editingNotes = null;
+    var previousValue = '';
+
     function toggleDropdown(btn) {
         var menu = btn.nextElementSibling;
         var isOpen = menu.classList.contains('show');
         document.querySelectorAll('.dropdown-menu.show').forEach(function(m) { m.classList.remove('show'); });
         if (!isOpen) menu.classList.add('show');
     }
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.dropdown')) {
-            document.querySelectorAll('.dropdown-menu.show').forEach(function(m) { m.classList.remove('show'); });
-        }
+
+    // --- Instant search ---
+    var searchTimer;
+    document.querySelector('.search-input').addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() { doSearch(); }, 300);
     });
+
+    function doSearch() {
+        var q = document.querySelector('.search-input').value;
+        var ville = document.querySelector('select[name=ville]').value;
+        var activite = document.querySelector('select[name=activite]').value;
+        var statut = document.querySelector('select[name=statut]').value;
+        fetch('/search?ville=' + encodeURIComponent(ville) + '&activite=' + encodeURIComponent(activite) + '&statut=' + encodeURIComponent(statut) + '&q=' + encodeURIComponent(q))
+            .then(function(r) { return r.text(); })
+            .then(function(html) {
+                document.getElementById('tableBody').innerHTML = html;
+                document.querySelector('.count-badge').textContent = document.querySelectorAll('#tableBody tr').length;
+            });
+    }
+
+    // --- Inline notes with event delegation ---
+    document.getElementById('tableBody').addEventListener('click', function(e) {
+        if (editingNotes) {
+            var el = editingNotes.parentElement;
+            if (el && !el.contains(e.target)) {
+                cancelNotes(el);
+            }
+            return;
+        }
+        var span = e.target.closest('.cell-notes');
+        if (span) editNotes(span);
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && editingNotes) { cancelNotes(editingNotes.parentElement); }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && editingNotes) { saveNotes(editingNotes.parentElement); }
+    });
+
+    document.addEventListener('blur', function(e) {
+        if (e.target && e.target.tagName === 'TEXTAREA' && editingNotes === e.target) {
+            saveNotes(e.target.parentElement);
+        }
+    }, true);
+
+    function editNotes(el) {
+        if (editingNotes) return;
+        previousValue = el.getAttribute('data-val') || '';
+        el.classList.add('editing');
+        el.innerHTML = '<textarea class="notes-textarea">' + escapeHtml(previousValue) + '</textarea>';
+        editingNotes = el.querySelector('textarea');
+        editingNotes.focus();
+    }
+
+    function cancelNotes(el) {
+        if (!editingNotes) return;
+        editingNotes = null;
+        el.classList.remove('editing');
+        el.innerHTML = escapeHtml(previousValue) || 'Ajouter...';
+    }
+
+    function saveNotes(el) {
+        var ta = el.querySelector('textarea');
+        if (!ta || !editingNotes) return;
+        var val = ta.value.trim();
+        editingNotes = null;
+        if (val && val !== previousValue) {
+            var id = el.getAttribute('data-id');
+            fetch('/notes?id=' + encodeURIComponent(id) + '&notes=' + encodeURIComponent(val), { method: 'POST' });
+        }
+        el.classList.remove('editing');
+        var display = val || 'Ajouter...';
+        el.setAttribute('data-val', val);
+        el.innerHTML = escapeHtml(display);
+    }
+
+    function escapeHtml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // --- Dark mode ---
+    if (localStorage.getItem('dark') === '1') document.documentElement.classList.add('dark');
+
+    function toggleDark() {
+        var d = document.documentElement;
+        d.classList.toggle('dark');
+        localStorage.setItem('dark', d.classList.contains('dark') ? '1' : '0');
+    }
 </script>
 
 </body>

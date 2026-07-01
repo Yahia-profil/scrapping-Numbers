@@ -132,6 +132,33 @@ public class CeoContactService {
         });
     }
 
+    public List<CeoContact> search(String city, String activity, String q) {
+        return search(city, activity, q, "TOUS");
+    }
+
+    public List<CeoContact> search(String city, String activity, String q, String status) {
+        List<CeoContact> filtered = getByCityAndActivity(city, activity);
+        if (status != null && !status.isBlank() && !status.equals("TOUS")) {
+            filtered = filtered.stream()
+                .filter(c -> status.equals(c.getStatus()))
+                .toList();
+        }
+        if (q == null || q.isBlank()) return filtered;
+        String lower = q.toLowerCase();
+        return filtered.stream()
+            .filter(c -> (c.getCompanyName() != null && c.getCompanyName().toLowerCase().contains(lower))
+                      || (c.getCeoName() != null && c.getCeoName().toLowerCase().contains(lower))
+                      || (c.getActivity() != null && c.getActivity().toLowerCase().contains(lower)))
+            .toList();
+    }
+
+    public void updateNotes(Long contactId, String notes) {
+        repository.findById(contactId).ifPresent(c -> {
+            c.setNotes(notes);
+            repository.save(c);
+        });
+    }
+
     public long count() {
         return repository.count();
     }
