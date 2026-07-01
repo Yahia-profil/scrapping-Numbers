@@ -63,14 +63,6 @@
         .navbar .container {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-        }
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 20px;
-            letter-spacing: -.3px;
-            color: #fff;
-            text-decoration: none;
         }
         .nav-link {
             border: 1.5px solid rgba(255,255,255,.35);
@@ -92,24 +84,6 @@
             margin: 0 auto;
         }
 
-        .page-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 24px;
-            padding-top: 24px;
-        }
-        .page-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text);
-        }
         .count-badge {
             background: var(--primary);
             color: #fff;
@@ -354,12 +328,12 @@
         }
         .empty-state p { font-size: 15px; margin: 0; font-weight: 400; }
 
-        @media (max-width: 768px) {
-            .page-header { flex-direction: column; align-items: stretch; }
-            .page-title { font-size: 22px; }
-            .header-actions { flex-direction: column; }
-            .header-actions .select-filter,
-            .header-actions .btn { width: 100%; }
+        @media (max-width: 900px) {
+            .navbar .container > div { flex-direction: column; align-items: stretch; }
+            .navbar .container form { flex-direction: column; }
+            .navbar .container form input,
+            .navbar .container form select,
+            .navbar .container form .btn { width: 100%; min-width: 0 !important; }
             thead th, tbody td { padding: 12px; }
         }
     </style>
@@ -368,45 +342,37 @@
 
 <nav class="navbar">
     <div class="container">
-        <a class="navbar-brand" href="/">Casablanca Annuaire Entreprises</a>
-        <div style="display:flex;gap:8px;align-items:center;">
-            <a class="nav-link" href="/">Dashboard</a>
-            <button class="nav-link" id="darkToggle" onclick="toggleDark()" style="border-color:rgba(255,255,255,.35);cursor:pointer;font-size:16px;line-height:1;padding:4px 12px;" title="Mode sombre">&#9790;</button>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%;">
+            <form method="get" action="/" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;">
+                <input type="text" name="q" class="search-input" placeholder="Rechercher..." th:value="${q}" autocomplete="off" style="min-width:140px;">
+                <select name="ville" class="select-filter" onchange="this.form.submit()" style="min-width:120px;">
+                    <option value="TOUTES" th:selected="${ville == 'TOUTES'}">Toutes les villes</option>
+                    <option th:each="v : ${villes}" th:value="${v}" th:text="${v}" th:selected="${ville == v}"></option>
+                </select>
+                <select name="activite" class="select-filter" onchange="this.form.submit()" style="min-width:120px;">
+                    <option value="TOUTES" th:selected="${activite == 'TOUTES'}">Toutes les activit&eacute;s</option>
+                    <option th:each="a : ${activites}" th:value="${a}" th:text="${a}" th:selected="${activite == a}"></option>
+                </select>
+                <select name="statut" class="select-filter" onchange="this.form.submit()" style="min-width:100px;">
+                    <option value="TOUS" th:selected="${statut == 'TOUS'}">Tous les statuts</option>
+                    <option value="valide" th:selected="${statut == 'valide'}">Valide</option>
+                    <option value="pending" th:selected="${statut == 'pending'}">Pending</option>
+                    <option value="refus" th:selected="${statut == 'refus'}">Refus</option>
+                </select>
+            </form>
+            <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+                <span class="count-badge" th:text="${total}" style="font-size:13px;padding:2px 12px;">0</span>
+                <a th:href="'/export/csv?ville=' + ${ville} + '&amp;activite=' + ${activite} + '&amp;statut=' + ${statut} + '&amp;q=' + ${q}" class="btn btn-success" style="padding:6px 14px;font-size:12px;">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2M5 8l3 3 3-3M8 3v8" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Export CSV
+                </a>
+                <button class="nav-link" onclick="toggleDark()" style="border-color:rgba(255,255,255,.35);cursor:pointer;font-size:15px;line-height:1;padding:2px 10px;" title="Mode sombre">&#9790;</button>
+            </div>
         </div>
     </div>
 </nav>
 
 <div class="container" style="padding-bottom: 48px;">
-
-        <div class="page-header">
-            <h1 class="page-title">
-                Contacts
-                <span class="count-badge" th:text="${total}">0</span>
-            </h1>
-            <div class="header-actions">
-                <form method="get" action="/" style="display:contents;" id="filterForm">
-                    <input type="text" name="q" class="search-input" placeholder="Rechercher..." th:value="${q}" autocomplete="off">
-                    <select name="ville" class="select-filter" onchange="this.form.submit()">
-                        <option value="TOUTES" th:selected="${ville == 'TOUTES'}">Toutes les villes</option>
-                        <option th:each="v : ${villes}" th:value="${v}" th:text="${v}" th:selected="${ville == v}"></option>
-                    </select>
-                    <select name="activite" class="select-filter" onchange="this.form.submit()">
-                        <option value="TOUTES" th:selected="${activite == 'TOUTES'}">Toutes les activit&eacute;s</option>
-                        <option th:each="a : ${activites}" th:value="${a}" th:text="${a}" th:selected="${activite == a}"></option>
-                    </select>
-                    <select name="statut" class="select-filter" onchange="this.form.submit()">
-                        <option value="TOUS" th:selected="${statut == 'TOUS'}">Tous les statuts</option>
-                        <option value="valide" th:selected="${statut == 'valide'}">Valide</option>
-                        <option value="pending" th:selected="${statut == 'pending'}">Pending</option>
-                        <option value="refus" th:selected="${statut == 'refus'}">Refus</option>
-                    </select>
-                </form>
-                <a th:href="'/export/csv?ville=' + ${ville} + '&amp;activite=' + ${activite} + '&amp;statut=' + ${statut} + '&amp;q=' + ${q}" class="btn btn-success">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2M5 8l3 3 3-3M8 3v8" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Export CSV
-                </a>
-            </div>
-        </div>
 
     <div class="card">
         <div class="table-scroll">
