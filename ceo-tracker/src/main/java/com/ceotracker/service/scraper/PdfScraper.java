@@ -19,11 +19,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class PdfScraper extends BaseScraper {
+public class PdfScraper {
 
     private static final Logger log = LoggerFactory.getLogger(PdfScraper.class);
     private static final String PDF_DIR = "C:\\Users\\user\\Desktop\\scrap";
     private static final String CLASSPATH_PDF = "/RH Emails - The bigest data base-1.pdf";
+
+    private final String name;
+    private final String sourceType;
 
     private static final Pattern GSM_ANY = Pattern.compile("0[67]\\s*(?:\\d\\s*){8}");
     private static final Pattern EMAIL_PAT = Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
@@ -73,10 +76,13 @@ public class PdfScraper extends BaseScraper {
     }
 
     public PdfScraper() {
-        super("PDF RH Emails", "PDF");
+        this.name = "PDF RH Emails";
+        this.sourceType = "PDF";
     }
 
-    @Override
+    public String getName() { return name; }
+    public String getSourceType() { return sourceType; }
+
     public List<CeoContact> scrape() {
         Set<CeoContact> results = new LinkedHashSet<>();
 

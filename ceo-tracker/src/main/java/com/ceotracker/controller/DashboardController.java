@@ -69,11 +69,4 @@ public class DashboardController {
         if (s == null) return "";
         return "\"" + s.replace("\"", "\"\"") + "\"";
     }
-
-    @GetMapping("/stats")
-    public String stats(Model model) {
-        long total = ceoContactService.count();
-        model.addAttribute("total", total);
-        return "stats";
-    }
 }
